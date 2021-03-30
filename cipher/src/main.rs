@@ -47,21 +47,31 @@ fn main() {
 }
 
 fn vigenere_cipher(message : String, key : String, decipher : bool) -> String{
-	let mut ciphered_message = String::new();
 	
-	for c in message.bytes(){
-		ciphered_message.push(c as char);
-	}
-	
-	return ciphered_message;
+	/* Invert key if decipher */
+	let key = if decipher {key.chars().map(|c| ((b'z' - c as u8 + 1)%26 + b'a') as char ).collect()} else {key};
+
+
+	(0..message.len()).map(|i| {
+			let c = message.as_bytes()[i] as char;
+			let key = key.as_bytes()[i%key.len()] as u8 - b'a';
+
+			if c.is_ascii_alphabetic() {
+					let first = if c.is_ascii_lowercase() {b'a'} else {b'A'};
+					(first + (c as u8 + key - first) % 26) as char
+			}	else {
+				c
+			}
+	})
+	.collect()
 }
 
-fn caesar_cipher(mut message : String, key : u8, decipher : bool) -> String{
+fn caesar_cipher(message : String, key : u8, decipher : bool) -> String{
 
 	/* Invert key if decipher */
 	let key = if decipher {26 - key} else {key};
 
-	message.as_mut_str().chars().map(|c| {
+	message.chars().map(|c| {
 			if c.is_ascii_alphabetic() {
 					let first = if c.is_ascii_lowercase() { b'a' } else { b'A' };
 					(first + (c as u8 + key - first) % 26) as char
